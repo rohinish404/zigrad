@@ -46,8 +46,8 @@ pub fn main() !void {
 
     var arr2 = [_]f64{2.0,3.0, -1.0};
     const res = try mlp.call(arr2[0..]);
-
-    std.debug.print("res - {any}", .{res.items});
+    defer res.deinit();
+    std.debug.print("res - {d:.2}", .{res.items[0].data});
 
 }
 
@@ -149,8 +149,8 @@ const MLP = struct {
 
     }
     fn call(self: @This(), x: []f64) !std.ArrayList(Value){
-        var input = try std.ArrayList(Value).initCapacity(self.allocator, x.len);
-        defer input.deinit();
+        var input = std.ArrayList(Value).init(self.allocator);
+        errdefer input.deinit();
 
         for (x) |val| {
             try input.append(try Value.init(val));
@@ -165,7 +165,6 @@ const MLP = struct {
             std.debug.print("---------------------------------=-----------------------", .{});
         }
 
-        std.debug.print(" input: {any}\n", .{input.items});
         return input;
     }    
 
